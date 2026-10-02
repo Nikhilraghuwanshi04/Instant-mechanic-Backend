@@ -95,7 +95,6 @@ Guardrails built into the client:
 backend/
 ├── manage.py
 ├── requirements.txt
-├── .env.example              # template — copy to .env and fill in
 ├── config/                   # Django project (settings, root URLs, wsgi/asgi)
 │   ├── settings.py           # env-driven: DEBUG, ALLOWED_HOSTS, CORS, limits, Gemini
 │   └── urls.py               # mounts chatbot.urls under /api/ + serves /media/ in DEBUG
@@ -135,7 +134,8 @@ python3 -m venv venv
 source venv/bin/activate          # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 
-cp .env.example .env              # then edit .env (a Gemini key is optional)
+# create backend/.env with the variables you need (all have safe dev
+# defaults — see the env table below; a Gemini key is optional)
 
 python manage.py migrate
 python manage.py runserver 8010
@@ -147,7 +147,7 @@ The app is fully functional without a `GEMINI_API_KEY` — the rule engine cover
 
 ## Environment variables
 
-All configuration is read from `backend/.env` (see `.env.example`). **`.env` is gitignored — never commit it.**
+All configuration is read from `backend/.env`. **`.env` is gitignored — never commit it.** Every variable has a safe development default, so the app runs even without a `.env` file (a Gemini key is only needed for the AI fallback).
 
 | Variable | Default | Purpose |
 |---|---|---|
@@ -430,7 +430,7 @@ python manage.py test chatbot
 Mapped to the assignment's security requirements:
 
 - **No secrets in the frontend** — the Gemini key exists only in backend `.env`; the frontend never sees or sends it.
-- **No `.env` in version control** — `.gitignore` excludes `.env` / `.env.*`; only placeholder `.env.example` is committed.
+- **No `.env` in version control** — `.gitignore` excludes `.env` / `.env.*`; no environment file is committed to this repo (required variables are documented in the table above).
 - **File validation** — every upload's real type is detected from magic bytes (client MIME type is not trusted), type must be on an allowlist, size is capped per media type, empty files and over-long filenames are rejected.
 - **No internal errors exposed** — user-facing messages are plain sentences; unhandled exceptions become generic JSON `500`s; Gemini failures silently fall back to rule-engine behaviour.
 - **CORS configured explicitly** — only origins listed in `CORS_ALLOWED_ORIGINS` may call the API.
